@@ -18,20 +18,36 @@ Parts of a User:
 
 ### Entries 
 
-Each entry is a record of a site. An entry is identified by a UUIDv4.
+Each entry is a record of a site. An entry is identified by a UUIDv4. An entry is made up of two part, `meta.json` and `data.json`.
 
-List of things in a Entry:
+List of things in a Entry's metadata:
 
 - UUIDv4 for identification (string)
 - Name (string)
 - Website (string)
+- Folder (string)
+- Favorite (bool)
+
+List of things in an Entry's data:
+
+- UUIDv4 for identification (string)
 - Username (string)
 - Password (string)
 - Comments (string)
 - Extra fields (array of tuples: label(string), content(string))
 		- These could be useful to track specific things about each site in a more granular manner than just storing them in the comments box
-- Attachments (array of tuples: UUIDv4(string), Original file name(string))
-		- Files can be attached to an entry, and they will be encrypted and stored alongside the entry information (and renamed, so as not to leak any metadata)
+- Attachments (array of UUIDs: UUIDv4(string))
+		- Files can be attached to an entry, and they will be encrypted and stored separately (and renamed, so as not to leak any metadata)
+
+### Attachments
+
+Attachments are stored separate from entries in their own directory. Each attachment has it's own metadata.
+
+List of things in an Attachment's metadata:
+
+- UUIDv4 for identification (string)
+- Original name
+- Filetype
 
 ### History
 
@@ -62,7 +78,7 @@ Encryption
 ----------
 
 The user creates a master password to encrypt and decrypt their data. A password by itself is a weak key, so to make it stronger, the master password will be run through a key derivation function (scrypt), to create the master key.
-This master key can then be used to decrypt each entry, it's history, it's attachments, and the private key.
+This master key can then be used to decrypt each entry's metadata, content, it's history, it's attachments, and the user's private key.
 
 File System Structure
 ---------------------
@@ -74,11 +90,16 @@ File System Structure
 			- userinfo.json (to store user UUID, opslimit, memlimit, salt, and maybe hash for key derivation)
 			- private.key (stored encrypted on disk)
 			- public.key (not stored encrpyted on disk)
+			- attachments/
+				- <attachment UUID>/
+					- meta.json
+					- file (named with the UUID of the attachment)
+				- ...
 			- db/
 				- <entry UUID>/
+					- meta.json (keeps metadata separate from regular entries)
 					- data.json (stores all the content about the entry)
 					- history.json (stores all the history about the entry)
-					- [attachment UUID] (encrypted files will be stored on disk here, along side the entry)
 					- ...
 				- ...
 			- friends/
