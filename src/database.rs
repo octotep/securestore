@@ -6,12 +6,12 @@ use self::sodiumoxide::crypto::pwhash;
 use self::uuid::Uuid;
 
 // Create custom wrappers for each way a UUID can be used
-pub struct AttachmentUUID(uuid::UUID);
-pub struct EntryUUID(uuid::UUID);
-pub struct UserUUID(uuid::UUID);
+pub struct AttachmentUuid(uuid::Uuid);
+pub struct EntryUuid(uuid::Uuid);
+pub struct UserUuid(uuid::Uuid);
 
 pub struct User {
-	uuid: UserUUID,
+	uuid: UserUuid,
 	salt: pwhash::Salt,
 	opslimit: pwhash::OpsLimit,
 	memlimit: pwhash::MemLimit,
@@ -20,13 +20,13 @@ pub struct User {
 }
 
 pub struct AttachmentMeta {
-	uuid: AttachmentUUID,
+	uuid: AttachmentUuid,
 	name: String,
 }
 
 // Metadata describing an entry
 pub struct EntryMeta {
-	uuid: EntryUUID,
+	uuid: EntryUuid,
 	created: time::Timespec,
 	updated: time::Timespec,
 	name: String,
@@ -45,5 +45,17 @@ pub struct Entry {
 	password: String,
 	notes: String,
 	custom_fields: Vec<EntryField>,
-	attachments: Vec<AttachmentUUID>,
+	attachments: Vec<AttachmentUuid>,
 }
+
+//pub fn create(path: Path) {
+//	let mut new_path = path.clone();
+//	new_path.push("securestore/users");
+//	DirBuilder::new()
+//	    .recursive(true)
+//	    .create(new_path).unwrap();
+//	Database {
+//		version: DB_VERSION,
+//		path: new_path,
+//	}
+//}
