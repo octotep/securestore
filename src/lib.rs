@@ -1,9 +1,12 @@
 extern crate rustc_serialize;
 extern crate sodiumoxide;
+extern crate uuid;
 
 use sodiumoxide::crypto::pwhash;
+use sodiumoxide::crypto::secretbox;
 use rustc_serialize::json;
 use rustc_serialize::hex::ToHex;
+use uuid::Uuid;
 
 use std::path::{Path, PathBuf};
 use std::fs::{self, DirBuilder};
@@ -24,6 +27,7 @@ pub struct Database  {
 #[derive(RustcDecodable, RustcEncodable)]
 pub struct User {
 	username: String,
+	uuid: String,
 	salt: String,
 	opslimit: usize,
 	memlimit: usize,
@@ -66,13 +70,25 @@ impl User {
 			.recursive(true)
 			.create(&userpath).unwrap();
 		let usersalt = pwhash::gen_salt();
+		let mut key = secretbox::Key([0; secretbox::KEYBYTES]);
+		println!("Key before: {:?}", key);
+		{
+			let secretbox::Key(ref mut kb) = key;
+			pwhash::derive_key(kb, password.as_bytes(), &usersalt, pwhash::OPSLIMIT_INTERACTIVE, pwhash::MEMLIMIT_INTERACTIVE).unwrap();
+			println!("Key: {:?}", kb);
+		}
+		let pwh = pwhash::pwhash(password.as_bytes(),
+                         pwhash::OPSLIMIT_INTERACTIVE,
+                         pwhash::MEMLIMIT_INTERACTIVE).unwrap();
+		let pwh_bytes = &pwh[..];
 		println!("Salt: {:?}", &usersalt.0.to_hex());
 		let user = User {
 			username: username.to_owned(),
+			uuid: Uuid::new_v4().to_hyphenated_string(),
 			salt: usersalt.0.to_hex(),
 			opslimit: pwhash::OPSLIMIT_INTERACTIVE.0,
 			memlimit: pwhash::MEMLIMIT_INTERACTIVE.0,
-			pwhash: password.to_owned(),
+			pwhash: pwh_bytes.to_hex(),
 		};
 		userpath.push("userinfo.json");
 		let mut user_info_file = File::create(userpath).unwrap();
