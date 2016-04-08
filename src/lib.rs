@@ -4,8 +4,8 @@
 extern crate rustc_serialize;
 extern crate serde;
 extern crate serde_json;
-extern crate uuid;
 extern crate sodiumoxide;
+extern crate uuid;
 
 use sodiumoxide::crypto::pwhash;
 use rustc_serialize::hex::ToHex;
@@ -70,7 +70,6 @@ impl Database {
 			memlimit: pwhash::MEMLIMIT_INTERACTIVE.0,
 			pwhash: password.to_owned(),
 		};
-		println!("{}", serde_json::to_string(&db).unwrap());
 		new_path.push("dbinfo.json");
 		let mut db_info_file = File::create(new_path).unwrap();
 		db_info_file.write_all(serde_json::to_string(&db).unwrap().as_bytes());
