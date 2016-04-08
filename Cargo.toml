@@ -5,6 +5,9 @@ authors = ["Chris Yealy <cyealy@ycp.edu>"]
 
 [dependencies]
 sodiumoxide = "0.0.9"
-rustc-serialize = "0.3.18"
-uuid = "0.1.18"
+serde = "0.7.0"
+serde_macros = "0.7.0"
+serde_json = "0.7.0"
+rustc-serialize = "0.3"
+uuid = { version = "0.2", features = ["serde", "v4"] }
 time = "0.1"
